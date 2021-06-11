@@ -6,6 +6,11 @@ import (
 	"encoding/xml"
 	"html/template"
 	"net/http"
+	"runtime"
+	"os/exec"
+	"fmt"
+
+	"github.com/manifoldco/promptui"
 )
 
 type Rss2 struct {
@@ -22,13 +27,32 @@ type Rss2 struct {
 
 type Item struct {
 	// Required
-	Title		string		`xml:"title"`
-	Link		string		`xml:"link"`
+	Title		string			`xml:"title"`
+	Link		string			`xml:"link"`
 	Description	template.HTML	`xml:"description"`
 	// Optional
 	Content		template.HTML	`xml:"encoded"`
-	PubDate		string		`xml:"pubDate"`
-	Comments	string		`xml:"comments"`
+	PubDate		string			`xml:"pubDate"`
+	Comments	string			`xml:"comments"`
+}
+
+func openbrowser(url string) {
+	var err error
+
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func main() {
@@ -52,7 +76,23 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	for i := 0; i < len(rss.ItemList); i++ {
-		log.Println(rss.ItemList[i].Title)
+	templates := &promptui.SelectTemplates{
+		Label: "{{ . }}?",
+		Active: "> {{ .Title | green }}",
+		Inactive: "{{ .Title }}",
+		Selected: "{{ .Title | green  }}",
+	}
+
+	prompt := promptui.Select{
+		Label: "News",
+		Items: rss.ItemList,
+		Templates: templates,
+		Size: 30,
+	}
+
+	index, _, err := prompt.Run()
+
+	if err == nil {
+		openbrowser(rss.ItemList[index].Link)
 	}
 }
