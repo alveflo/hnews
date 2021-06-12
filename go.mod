@@ -1,4 +1,4 @@
-module github.com/alveflo/hnreader
+module github.com/alveflo/hnews
 
 go 1.16
 

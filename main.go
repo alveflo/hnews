@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
-	"runtime"
-	"os/exec"
 	"fmt"
+	"log"
+	"os/exec"
+	"runtime"
 
-	"github.com/alveflo/hnreader/pkg/rss"
+	"github.com/alveflo/hnews/pkg/rss"
 	"github.com/manifoldco/promptui"
 )
 
@@ -38,17 +38,17 @@ func main() {
 	}
 
 	templates := &promptui.SelectTemplates{
-		Label: "{{ . }}?",
-		Active: "> {{ .Title | green }}",
+		Label:    "{{ . }}?",
+		Active:   "> {{ .Title | green }}",
 		Inactive: "{{ .Title }}",
 		Selected: "{{ .Title | green  }}",
 	}
 
 	prompt := promptui.Select{
-		Label: "News",
-		Items: rss.ItemList,
+		Label:     "News",
+		Items:     rss.ItemList,
 		Templates: templates,
-		Size: 30,
+		Size:      30,
 	}
 
 	index, _, err := prompt.Run()
